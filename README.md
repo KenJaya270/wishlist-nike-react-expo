@@ -20,7 +20,6 @@ Aplikasi manajemen wishlist modern yang dibangun dengan React Native, Expo, dan 
 
 </div>
 
-> **Catatan:** Ganti path gambar di atas dengan lokasi screenshot aplikasi Anda. Disarankan untuk menyimpan screenshot di folder `assets/screenshots/`
 
 ## 📱 Fitur
 
