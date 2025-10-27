@@ -1,10 +1,11 @@
-//index.tsx
+// index.tsx
 import CardWishlist from '@/components/Card';
 import ModalComponent from '@/components/Modal';
 import { useWishlistStore, WishlistItem } from '@/store/useWishlistStore';
+import { useTheme } from '@/theme/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -27,18 +28,13 @@ export default function Index() {
   const {wishlists, deleteWishlist, loading} = useWishlistStore();
 
   const handleAdd = () => {
-    console.log('Add button pressed');
     setEditingItem(null);
     setVisible(true);
-    console.log('visible state should be true now:', true);
   }
 
   const handleEdit = (item: WishlistItem) => {
-
     setEditingItem(item);
-
     setVisible(true);
-
   };
 
   const handleDelete = (id: string) => {
@@ -57,24 +53,34 @@ export default function Index() {
   };
 
   const handleCloseModal = () => {
-
     setVisible(false);
-
     setEditingItem(null);
-
   };
 
   const formatPrice = (price: string) => {
-
     return parseInt(price).toLocaleString('id-ID');
-
   };
+
+  const {isDarkMode, toggleTheme} = useTheme();
+
+  const theme = {
+    background: isDarkMode ? "#121212" : "#f5f5f5",
+    card: isDarkMode ? "#1e1e1e" : "white",
+    text: isDarkMode ? "#fff" : "#333",
+    subtext: isDarkMode ? "#aaa" : "#666",
+    fab: "#007AFF",
+    border: isDarkMode ? "#333" : "#f0f0f0",
+    surfaceAlt: isDarkMode ? "#222" : "#f8f8f8",
+  };
+
+  // buat styles dinamis — useMemo untuk performa
+  const styles = useMemo(() => getStyles(theme), [theme]);
 
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#007AFF" />
+          <ActivityIndicator size="large" color={theme.fab} />
           <Text style={styles.loadingText}>Loading wishlists...</Text>
         </View>
       </SafeAreaView>
@@ -86,14 +92,15 @@ export default function Index() {
 
       <View style={styles.header}>
         <Text style={styles.headerTitle}>My Wishlist</Text>
-        <Text style={styles.headerSubtitle}>
-          {wishlists.length} items in wishlist
-        </Text>
+
+        <TouchableOpacity onPress={toggleTheme} style={styles.themeButton}>
+          <Ionicons name={isDarkMode ? "sunny-outline" : "moon-outline"} size={24} color={theme.text} />
+        </TouchableOpacity>
       </View>
 
       {wishlists.length === 0 ? (
         <View style={styles.emptyState}>
-          <Ionicons name="heart-outline" size={64} color="#ccc" />
+          <Ionicons name="heart-outline" size={64} color={theme.subtext} />
           <Text style={styles.emptyText}>Your wishlist is empty</Text>
           <Text style={styles.emptySubtext}>
             Tap the + button to add your first item
@@ -125,12 +132,10 @@ export default function Index() {
       )}
 
       <TouchableOpacity 
-        style={styles.fab}
+        style={[styles.fab, { backgroundColor: theme.fab }]}
         onPress={handleAdd}
       >
-        
         <Ionicons name="add" size={24} color="white"/>
-
       </TouchableOpacity>
 
       <ModalComponent 
@@ -143,26 +148,37 @@ export default function Index() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme.background,
   },
   header: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     padding: 16,
-    backgroundColor: 'white',
+    backgroundColor: theme.card,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: theme.border,
+  },
+  themeButton: {
+    padding: 6,
+    borderRadius: 8,
+    backgroundColor: theme.surfaceAlt,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: theme.text,
     textAlign: 'center',
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#666',
+    color: theme.subtext,
     textAlign: 'center',
     marginTop: 4,
   },
@@ -174,7 +190,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#666',
+    color: theme.subtext,
   },
   emptyState: {
     flex: 1,
@@ -184,13 +200,13 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 18,
-    color: '#666',
+    color: theme.subtext,
     marginTop: 16,
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#999',
+    color: theme.subtext,
     textAlign: 'center',
   },
   listContent: {
@@ -200,7 +216,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 20,
     bottom: 20,
-    backgroundColor: '#007AFF',
+    // backgroundColor sekarang di-set inline agar mudah override
     width: 60,
     height: 60,
     borderRadius: 30,
@@ -215,4 +231,4 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-})
+});
