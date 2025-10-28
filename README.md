@@ -24,6 +24,10 @@ Aplikasi manajemen wishlist modern yang dibangun dengan React Native, Expo, dan 
   <img src="./assets/screenshots/IMG-20251027-WA0004.jpg" alt="Detail Screen" width="250"/>
   <img src="./assets/screenshots/IMG-20251027-WA0005.jpg" alt="Detail Screen" width="250"/>
 
+  <img src="./assets/screenshots/IMG-20251028-WA0005.jpg" alt="Detail Screen" width="250"/>
+  <img src="./assets/screenshots/IMG-20251028-WA0006.jpg" alt="Detail Screen" width="250"/>
+
+
 </div>
 
 
