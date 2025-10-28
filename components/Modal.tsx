@@ -2,16 +2,18 @@
 import { useWishlistStore, WishlistItem } from "@/store/useWishlistStore";
 import { useTheme } from "@/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-    Alert,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 interface ModalComponentProps {
@@ -48,6 +50,7 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ visible, onClose, editI
     image: "",
   });
 
+  // 🔹 Reset form saat modal dibuka
   useEffect(() => {
     if (visible) {
       if (editItem) {
@@ -59,17 +62,41 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ visible, onClose, editI
     }
   }, [visible, editItem]);
 
+  // 🔹 Fungsi validasi form
   const validateForm = () => {
     const newErrors = { title: "", price: "", image: "" };
     if (!formData.title.trim()) newErrors.title = "Title is required";
     if (!formData.price.trim()) newErrors.price = "Price is required";
     else if (isNaN(Number(formData.price))) newErrors.price = "Price must be a number";
-    if (!formData.image.trim()) newErrors.image = "Image URL is required";
+    if (!formData.image.trim()) newErrors.image = "Image is required";
 
     setErrors(newErrors);
     return !newErrors.title && !newErrors.price && !newErrors.image;
   };
 
+  // 🔹 Image Picker Handler
+  const pickImage = async () => {
+    // Minta izin akses galeri
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission denied", "You need to allow access to photos to continue.");
+      return;
+    }
+
+    // Buka galeri
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 1,
+      aspect: [1, 1],
+      allowsEditing: true,
+    });
+
+    if (!result.canceled) {
+      setFormData((prev) => ({ ...prev, image: result.assets[0].uri }));
+    }
+  };
+
+  // 🔹 Submit form
   const handleSubmit = () => {
     if (!validateForm()) return;
     try {
@@ -99,6 +126,7 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ visible, onClose, editI
           </View>
 
           <ScrollView style={styles.formContainer} contentContainerStyle={{ paddingBottom: 24 }}>
+            {/* Input Title */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Title *</Text>
               <TextInput
@@ -112,6 +140,7 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ visible, onClose, editI
               {errors.title ? <Text style={styles.errorText}>{errors.title}</Text> : null}
             </View>
 
+            {/* Input Price */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Price *</Text>
               <TextInput
@@ -125,19 +154,28 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ visible, onClose, editI
               {errors.price ? <Text style={styles.errorText}>{errors.price}</Text> : null}
             </View>
 
+            {/* Image Picker */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Image URL *</Text>
-              <TextInput
-                style={[styles.textInput, errors.image && styles.inputError]}
-                placeholder="Masukkan URL gambar"
-                placeholderTextColor={theme.subtext}
-                autoCapitalize="none"
-                value={formData.image}
-                onChangeText={(text) => setFormData((p) => ({ ...p, image: text }))}
-              />
+              <Text style={styles.label}>Gambar *</Text>
+
+              {formData.image ? (
+                <Image source={{ uri: formData.image }} style={styles.imagePreview} />
+              ) : (
+                <View style={styles.imagePlaceholder}>
+                  <Ionicons name="image-outline" size={40} color={theme.subtext} />
+                  <Text style={{ color: theme.subtext, marginTop: 8 }}>Tidak ada gambar</Text>
+                </View>
+              )}
+
+              <TouchableOpacity style={styles.pickButton} onPress={pickImage}>
+                <Ionicons name="camera" size={18} color="white" />
+                <Text style={styles.pickButtonText}>Pilih Gambar</Text>
+              </TouchableOpacity>
+
               {errors.image ? <Text style={styles.errorText}>{errors.image}</Text> : null}
             </View>
 
+            {/* Tombol Submit */}
             <View style={styles.modalFooter}>
               <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={onClose}>
                 <Text style={styles.cancelButtonText}>Batal</Text>
@@ -167,7 +205,7 @@ const getStyles = (theme: any) =>
     },
     modalContent: {
       width: "100%",
-      maxHeight: "80%",
+      maxHeight: "85%",
       borderRadius: 12,
       overflow: "hidden",
       backgroundColor: theme.card,
@@ -202,6 +240,37 @@ const getStyles = (theme: any) =>
     },
     inputError: { borderColor: "#ff3b30" },
     errorText: { color: "#ff3b30", fontSize: 12, marginTop: 4 },
+    imagePreview: {
+      width: "100%",
+      height: 180,
+      borderRadius: 8,
+      marginBottom: 8,
+    },
+    imagePlaceholder: {
+      width: "100%",
+      height: 180,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: theme.border,
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: 8,
+      backgroundColor: theme.surfaceAlt,
+    },
+    pickButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: theme.accent,
+      borderRadius: 8,
+      paddingVertical: 10,
+      gap: 8,
+    },
+    pickButtonText: {
+      color: "white",
+      fontWeight: "600",
+      fontSize: 14,
+    },
     modalFooter: {
       flexDirection: "row",
       justifyContent: "flex-end",

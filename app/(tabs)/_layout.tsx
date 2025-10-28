@@ -28,6 +28,13 @@ export default function TabsLayout(){
 
                 }} />
 
+                <Tabs.Screen name="about" options={{ 
+                    title: "About", 
+                    tabBarIcon: ({ color }) => (
+                        <Ionicons name="information-circle" size={24} color={color} />
+                    )
+                }} />
+
             </Tabs>
         </ThemeProvider>
     )
