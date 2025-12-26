@@ -97,19 +97,20 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ visible, onClose, editI
   };
 
   // 🔹 Submit form
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) return;
+
     try {
       if (editItem) {
-        updateWishlist(editItem.id, formData);
+        await updateWishlist(editItem.id, formData);
         Alert.alert("Success", "Wishlist updated successfully");
       } else {
-        addWishlist(formData);
+        await addWishlist(formData);
         Alert.alert("Success", "Wishlist added successfully");
       }
       onClose();
-    } catch (error) {
-      Alert.alert("Error", "Failed to save wishlist");
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to save wishlist. Please try again.");
       console.error(error);
     }
   };

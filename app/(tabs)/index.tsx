@@ -5,7 +5,8 @@ import { useWishlistStore, WishlistItem } from '@/store/useWishlistStore';
 import { useTheme } from '@/theme/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useMemo, useState } from 'react';
+import "expo-router/entry";
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -26,17 +27,22 @@ export default function Index() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const router = useRouter();
-  const { wishlists, deleteWishlist, loading } = useWishlistStore();
+  const { wishlists, deleteWishlist, loading, fetchWishlists, error, clearError } = useWishlistStore();
   const { isDarkMode, toggleTheme } = useTheme();
+
+  // 🔹 Fetch wishlists from Supabase on mount
+  useEffect(() => {
+    fetchWishlists();
+  }, []);
 
   // Filter wishlists berdasarkan search query (tanpa deskripsi)
   const filteredWishlists = useMemo(() => {
     if (!searchQuery.trim()) {
       return wishlists;
     }
-    
+
     const query = searchQuery.toLowerCase().trim();
-    return wishlists.filter(item => 
+    return wishlists.filter(item =>
       item.title.toLowerCase().includes(query) ||
       item.price.toLowerCase().includes(query)
     );
@@ -52,16 +58,23 @@ export default function Index() {
     setVisible(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     Alert.alert(
       "Delete Wishlist",
       "Are you sure you want to delete this item?",
       [
         { text: "Cancel", style: "cancel" },
-        { 
-          text: "Delete", 
+        {
+          text: "Delete",
           style: "destructive",
-          onPress: () => deleteWishlist(id)
+          onPress: async () => {
+            try {
+              await deleteWishlist(id);
+              Alert.alert("Success", "Item deleted successfully");
+            } catch (error) {
+              Alert.alert("Error", "Failed to delete item. Please try again.");
+            }
+          }
         }
       ]
     );
@@ -124,10 +137,10 @@ export default function Index() {
           styles.searchInputContainer,
           isSearchFocused && styles.searchInputContainerFocused
         ]}>
-          <Ionicons 
-            name="search" 
-            size={20} 
-            color={theme.placeholder} 
+          <Ionicons
+            name="search"
+            size={20}
+            color={theme.placeholder}
             style={styles.searchIcon}
           />
           <TextInput
@@ -146,7 +159,7 @@ export default function Index() {
             }}
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.clearButton}
               onPress={handleClearSearch}
             >
@@ -178,7 +191,7 @@ export default function Index() {
               <Text style={styles.emptySubtext}>
                 Try different keywords or clear your search
               </Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.clearSearchButton}
                 onPress={handleClearSearch}
               >
@@ -200,7 +213,7 @@ export default function Index() {
           data={filteredWishlists}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <Pressable 
+            <Pressable
               onPress={() => {
                 // Tambahkan pengecekan fokus search
                 if (isSearchFocused) {
@@ -236,15 +249,15 @@ export default function Index() {
       )}
 
       {/* FAB Button */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[styles.fab, { backgroundColor: theme.fab }]}
         onPress={handleAdd}
       >
-        <Ionicons name="add" size={24} color="white"/>
+        <Ionicons name="add" size={24} color="white" />
       </TouchableOpacity>
 
       {/* Modal */}
-      <ModalComponent 
+      <ModalComponent
         visible={visible}
         onClose={handleCloseModal}
         editItem={editingItem}
@@ -281,7 +294,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     color: theme.text,
     textAlign: 'center',
   },
-  
+
   // Search Bar Styles
   searchContainer: {
     padding: 16,
@@ -315,7 +328,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     padding: 4,
     marginLeft: 4,
   },
-  
+
   // Search Info
   searchInfoContainer: {
     flexDirection: 'row',
@@ -338,7 +351,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     color: theme.fab,
     fontWeight: '600',
   },
-  
+
   // Empty States
   emptyState: {
     flex: 1,
@@ -371,12 +384,12 @@ const getStyles = (theme: any) => StyleSheet.create({
     fontWeight: '600',
     fontSize: 14,
   },
-  
+
   // List
   listContent: {
     padding: 8,
   },
-  
+
   // Loading
   loadingContainer: {
     flex: 1,
@@ -388,7 +401,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     fontSize: 16,
     color: theme.subtext,
   },
-  
+
   // FAB
   fab: {
     position: 'absolute',

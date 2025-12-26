@@ -1,9 +1,10 @@
 // Card.tsx
 import { WishlistItem } from "@/store/useWishlistStore";
 import { useTheme } from "@/theme/ThemeContext";
+import { makeDeepLink } from "@/utils/deeplink";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useMemo } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, Share, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface CardWishlistProps {
   item: WishlistItem;
@@ -28,6 +29,14 @@ export default function CardWishlist({ item, onEdit, onDelete }: CardWishlistPro
 
   const handleDelete = () => onDelete(item.id);
   const handleEdit = () => onEdit(item);
+  const handleShare = async () => {
+    try {
+      const url = makeDeepLink(item.id);
+      await Share.share({ message: `Check out this item: ${url}` });
+    } catch (e) {
+      console.warn("Share failed", e);
+    }
+  };
 
   return (
     <View style={styles.card}>
@@ -41,6 +50,11 @@ export default function CardWishlist({ item, onEdit, onDelete }: CardWishlistPro
           <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
             <Ionicons name="pencil" size={16} color={theme.accent} />
             <Text style={styles.editButtonText}>Edit</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.secondaryButton} onPress={handleShare}>
+            <Ionicons name="share-outline" size={14} color={theme.accent} />
+            <Text style={styles.secondaryButtonText}>Share</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
@@ -115,6 +129,23 @@ const getStyles = (theme: any) =>
       borderWidth: 1,
       borderColor: "#ff3b30",
       marginLeft: 8,
+    },
+    secondaryButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 6,
+      gap: 8,
+      backgroundColor: theme.surfaceAlt,
+      borderWidth: 1,
+      borderColor: theme.accent,
+      marginLeft: 8,
+    },
+    secondaryButtonText: {
+      color: theme.accent,
+      fontSize: 12,
+      fontWeight: "600",
     },
     editButtonText: {
       color: theme.accent,
