@@ -222,8 +222,7 @@ export default function Index() {
                 }
                 const { setActiveId } = useWishlistStore.getState();
                 setActiveId(item.id);
-                // Navigate to the detail tab
-                router.navigate('/(tabs)/detail/index');
+                router.navigate('/detail');
               }}
             >
               <CardWishlist
