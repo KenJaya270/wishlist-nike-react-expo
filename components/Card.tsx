@@ -52,11 +52,6 @@ export default function CardWishlist({ item, onEdit, onDelete }: CardWishlistPro
             <Text style={styles.editButtonText}>Edit</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.secondaryButton} onPress={handleShare}>
-            <Ionicons name="share-outline" size={14} color={theme.accent} />
-            <Text style={styles.secondaryButtonText}>Share</Text>
-          </TouchableOpacity>
-
           <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
             <Ionicons name="trash" size={14} color="#ff3b30" />
             <Text style={styles.deleteButtonText}>Delete</Text>

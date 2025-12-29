@@ -27,6 +27,9 @@ interface WishlistState {
     getWishlist: (id: string) => WishlistItem | undefined;
     clearAll: () => void;
     clearError: () => void;
+
+    activeId: string | null;
+    setActiveId: (id: string | null) => void;
 }
 
 export const useWishlistStore = create<WishlistState>()(
@@ -206,12 +209,16 @@ export const useWishlistStore = create<WishlistState>()(
             clearError: () => {
                 set({ error: null });
             },
+
+            // 🔹 Active Item State (Not persisted)
+            activeId: null,
+            setActiveId: (id) => set({ activeId: id }),
         }),
         {
             name: 'wishlist-storage',
             storage: createJSONStorage(() => AsyncStorage),
             version: 2,
-            partialize: (state) => ({ wishlists: state.wishlists }),
+            partialize: (state) => ({ wishlists: state.wishlists }), // Only persist wishlists
         }
     )
 );

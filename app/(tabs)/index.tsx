@@ -27,7 +27,7 @@ export default function Index() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const router = useRouter();
-  const { wishlists, deleteWishlist, loading, fetchWishlists, error, clearError } = useWishlistStore();
+  const { wishlists, deleteWishlist, loading, fetchWishlists, error, clearError, setActiveId } = useWishlistStore();
   const { isDarkMode, toggleTheme } = useTheme();
 
   // 🔹 Fetch wishlists from Supabase on mount
@@ -220,10 +220,10 @@ export default function Index() {
                   setIsSearchFocused(false);
                   return;
                 }
-                router.push({
-                  pathname: '/detail/[id]',
-                  params: { id: item.id }
-                });
+                const { setActiveId } = useWishlistStore.getState();
+                setActiveId(item.id);
+                // Navigate to the detail tab
+                router.navigate('/(tabs)/detail/index');
               }}
             >
               <CardWishlist

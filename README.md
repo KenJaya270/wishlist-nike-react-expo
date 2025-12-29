@@ -213,3 +213,9 @@ npx uri-scheme open wishlistnike://detail/123 --ios
 ```
 
 Atau, di aplikasi, gunakan tombol Share pada kartu untuk membagikan deep link item.
+
+## 🌐 Deferred Link
+
+Link ini menggunakan Airbridge untuk mengarahkan pengguna ke aplikasi (atau Store jika belum terinstall):
+
+https://abr.ge/5kgrlwo
